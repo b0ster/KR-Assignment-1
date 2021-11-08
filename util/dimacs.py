@@ -1,4 +1,7 @@
 class DIMACS:
+    """
+        Reads DIMACS format from a file, and puts the clauses into memory
+    """
     def __init__(self, file) -> None:
         if not isinstance(file, str):
             raise Exception("file should be a string path.")
