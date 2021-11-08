@@ -2,7 +2,7 @@ from sat.sat_solver import SatSolver
 from util.dimacs import DIMACS
 
 if __name__ == '__main__':
-    d = DIMACS(file="data/sudoku-rules.txt")
+    d = DIMACS(file="data/rules/sudoku-rules.txt")
     ss = SatSolver(rules=d)
 
     # this, for now, finds any satisfying sudoku, as only the rules need to be satisfied.

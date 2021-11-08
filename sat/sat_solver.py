@@ -3,19 +3,14 @@ import copy
 
 
 class SatSolver:
-    @staticmethod
-    def assert_is_dimacs(x):
-        if x is None or not isinstance(x, DIMACS):
-            raise Exception("Type must be DIMACS.")
 
-    def __init__(self, rules, heuristics=None) -> None:
-        self.assert_is_dimacs(rules)
+    def __init__(self, rules: DIMACS, heuristics=None) -> None:
         self.rules = rules
         self.heuristics = heuristics
         pass
 
     @staticmethod
-    def is_satisfied(problem):
+    def is_satisfied(problem: DIMACS):
         # check if all clauses are solved currently, then a model has been found
         if len(problem.get_clauses()) == 0:
             return True
@@ -26,7 +21,7 @@ class SatSolver:
         return None
 
     @staticmethod
-    def choose_next_var(vars, var_assignments) -> int:
+    def choose_next_var(vars: [], var_assignments: {}) -> int:
         # todo: determine here to use heuristics
         for v in vars:
             # search for a non-used parameter to be assigned
@@ -35,8 +30,7 @@ class SatSolver:
 
         raise Exception("No new variables to assign.")
 
-    def solve(self, problem, vars, var_assignments) -> tuple:
-        self.assert_is_dimacs(problem)
+    def solve(self, problem: DIMACS, vars: [], var_assignments: {}) -> {}:
         satisfied = self.is_satisfied(problem)
         if satisfied is not None:
             return satisfied, var_assignments

@@ -2,7 +2,8 @@ class DIMACS:
     """
         Reads DIMACS format from a file, and puts the clauses into memory
     """
-    def __init__(self, file) -> None:
+
+    def __init__(self, file: str) -> None:
         if not isinstance(file, str):
             raise Exception("file should be a string path.")
         self.clauses = []
@@ -15,19 +16,19 @@ class DIMACS:
                     clause = list(map(lambda x: int(x), clause))
                     self.clauses.append(clause)
 
-    def set_clauses(self, clauses) -> None:
+    def set_clauses(self, clauses: []) -> None:
         self.clauses = clauses
 
     def get_clauses(self) -> []:
         return self.clauses
 
-    def add_clause(self, clause) -> None:
+    def add_clause(self, clause: []) -> None:
         self.clauses.append(clause)
 
-    def remove_clause_containing(self, literal) -> None:
+    def remove_clause_containing(self, literal: int) -> None:
         self.clauses = list(filter(lambda x: literal not in x, self.clauses))
 
-    def remove_literal_from_clauses(self, literal) -> None:
+    def remove_literal_from_clauses(self, literal: int) -> None:
         for c in self.clauses:
             if literal in c:
                 c.remove(literal)
@@ -35,7 +36,7 @@ class DIMACS:
                 c.remove(-literal)
 
     @staticmethod
-    def is_unit_clause(clause) -> bool:
+    def is_unit_clause(clause: []) -> bool:
         return len(clause) == 1
 
     def get_unit_clauses(self) -> []:
@@ -53,5 +54,5 @@ class DIMACS:
         return literals
 
     @staticmethod
-    def literal_is_negated(literal) -> bool:
+    def literal_is_negated(literal: int) -> bool:
         return literal < 0
