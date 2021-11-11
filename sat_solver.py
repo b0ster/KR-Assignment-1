@@ -8,7 +8,8 @@ arg_parser.add_argument('-S', choices=["1", "2", "3"], default="1", required=Tru
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
-    "1": DPLL(heuristics=None)
+    "1": DPLL(heuristics=None),
+    "2": DPLL(heuristics=DPLL.heuristic_unit_class_prioritize)
     # todo: add more DPLLs with heuristics here
 }
 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     if args.S not in dplls:
         raise Exception("DPLL with id '{}' has not been implemented yet.".format(args.S))
     # solve the merged SAT problems using the DPLL algorithm
-    satisfied, assignments = dplls[args.S].solve(total_problem, total_problem.get_all_variables(), {})
+    satisfied, assignments = dplls[args.S].solve(total_problem, {})
     # make a printable solution if there is one
     items = list(assignments.items())
     items.sort()

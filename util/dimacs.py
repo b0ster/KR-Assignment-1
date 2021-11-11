@@ -6,6 +6,7 @@ class DIMACS:
     def __init__(self, file: str = None) -> None:
         self.clauses = {}
         self.literal_indices = {}
+        self.unit_literals = []
         if file is not None:
             with open(file, 'r') as f:
                 lines = f.readlines()
@@ -28,6 +29,8 @@ class DIMACS:
         # ignore duplicate clauses
         if clause_idx not in self.clauses:
             self.clauses[clause_idx] = clause
+            if len(clause) == 1:
+                self.unit_literals.append(clause[0])
             for lit in clause:
                 if lit in self.literal_indices:
                     self.literal_indices[lit].append(clause_idx)
@@ -58,6 +61,9 @@ class DIMACS:
 
     def get_all_variables(self) -> []:
         return list(set((map(lambda x: abs(x), self.get_all_literals()))))
+
+    def get_unit_variables(self) -> []:
+        return list(set(map(lambda x: abs(x), self.unit_literals)))
 
     def get_all_literals(self) -> []:
         return self.literal_indices.keys()
