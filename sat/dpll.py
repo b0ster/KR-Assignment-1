@@ -3,7 +3,8 @@ import copy
 
 
 class DPLL:
-    heuristic_unit_class_prioritize = "unit_clause_prioritize"
+    # branch immediately on unit literals and pure literals
+    heuristic_unit_prioritize = "unit_prioritize"
 
     def __init__(self, heuristics=None) -> None:
         self.heuristics = heuristics
@@ -27,8 +28,9 @@ class DPLL:
                 # search for a non-used parameter to be assigned
                 if abs(v) not in var_assignments.keys():
                     return abs(v)
-        elif self.heuristics == DPLL.heuristic_unit_class_prioritize:
-            for v in problem.get_unit_variables():
+        elif self.heuristics == DPLL.heuristic_unit_prioritize:
+            prio_vars = problem.get_unit_variables() + problem.get_pure_variables()
+            for v in prio_vars:
                 # search for a non-used parameter to be assigned
                 if abs(v) not in var_assignments.keys():
                     return abs(v)

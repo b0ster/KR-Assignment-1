@@ -9,7 +9,7 @@ arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
     "1": DPLL(heuristics=None),
-    "2": DPLL(heuristics=DPLL.heuristic_unit_class_prioritize)
+    "2": DPLL(heuristics=DPLL.heuristic_unit_prioritize)
     # todo: add more DPLLs with heuristics here
 }
 

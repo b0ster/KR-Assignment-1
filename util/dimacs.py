@@ -7,6 +7,7 @@ class DIMACS:
         self.clauses = {}
         self.literal_indices = {}
         self.unit_literals = []
+        self.pure_literals = []
         if file is not None:
             with open(file, 'r') as f:
                 lines = f.readlines()
@@ -36,6 +37,13 @@ class DIMACS:
                     self.literal_indices[lit].append(clause_idx)
                 else:
                     self.literal_indices[lit] = [clause_idx]
+                if -lit not in self.literal_indices and lit not in self.pure_literals:
+                    self.pure_literals.append(lit)
+                elif -lit in self.literal_indices:
+                    if lit in self.pure_literals:
+                        del self.pure_literals[self.pure_literals.index(lit)]
+                    if -lit in self.pure_literals:
+                        del self.pure_literals[self.pure_literals.index(-lit)]
 
     def remove_clause_containing(self, literal: int) -> None:
         for c_idx in self.literal_indices[literal]:
@@ -64,6 +72,9 @@ class DIMACS:
 
     def get_unit_variables(self) -> []:
         return list(set(map(lambda x: abs(x), self.unit_literals)))
+
+    def get_pure_variables(self) -> []:
+        return list(set(map(lambda x: abs(x), self.pure_literals)))
 
     def get_all_literals(self) -> []:
         return self.literal_indices.keys()
