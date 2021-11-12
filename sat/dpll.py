@@ -4,7 +4,7 @@ import copy
 
 class DPLL:
     # branch immediately on unit literals and pure literals
-    heuristic_unit_prioritize = "unit_prioritize"
+    heuristic_original = "original"
 
     def __init__(self, heuristics=None) -> None:
         self.heuristics = heuristics
@@ -23,20 +23,24 @@ class DPLL:
         return None
 
     def choose_next_var(self, problem: DIMACS, var_assignments: {}) -> int:
+        not_used = lambda x: abs(x) not in var_assignments.keys()
         if self.heuristics is None:
             for v in problem.get_all_variables():
                 # search for a non-used parameter to be assigned
-                if abs(v) not in var_assignments.keys():
+                if not_used(v):
                     return abs(v)
-        elif self.heuristics == DPLL.heuristic_unit_prioritize:
-            prio_vars = problem.get_unit_variables() + problem.get_pure_variables()
-            for v in prio_vars:
+        elif self.heuristics == DPLL.heuristic_original:
+            for v in problem.get_unit_variables():
                 # search for a non-used parameter to be assigned
-                if abs(v) not in var_assignments.keys():
+                if not_used(v):
+                    return abs(v)
+            for v in problem.get_pure_variables():
+                # search for a non-used parameter to be assigned
+                if not_used(v):
                     return abs(v)
             for v in problem.get_all_variables():
                 # search for a non-used parameter to be assigned
-                if abs(v) not in var_assignments.keys():
+                if not_used(v):
                     return abs(v)
 
         raise Exception("No new variables to assign.")
