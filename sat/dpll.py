@@ -3,7 +3,7 @@ import copy
 
 
 class DPLL:
-    # branch immediately on unit literals and pure literals
+    # branch immediately on unit literals (note: pure literals are ignored due to the computational expensiveness)
     heuristic_original = "original"
 
     def __init__(self, heuristics=None) -> None:
@@ -31,10 +31,6 @@ class DPLL:
                     return abs(v)
         elif self.heuristics == DPLL.heuristic_original:
             for v in problem.get_unit_variables():
-                # search for a non-used parameter to be assigned
-                if not_used(v):
-                    return abs(v)
-            for v in problem.get_pure_variables():
                 # search for a non-used parameter to be assigned
                 if not_used(v):
                     return abs(v)
