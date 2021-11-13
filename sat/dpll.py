@@ -21,7 +21,7 @@ class DPLL:
         return None
 
     @staticmethod
-    def choose_next_var(vars: [], var_assignments: {}) -> int:
+    def choose_next_var(vars: list, var_assignments: dict) -> int:
         # todo: determine here to use heuristics
         for v in vars:
             # search for a non-used parameter to be assigned
@@ -30,7 +30,7 @@ class DPLL:
 
         raise Exception("No new variables to assign.")
 
-    def solve(self, problem: DIMACS, vars: [], var_assignments: {}) -> {}:
+    def solve(self, problem: DIMACS, vars: list(str), var_assignments: list) -> tuple(bool, list):
         self.num_evaluations += 1
         print("DPLL: evaluation #{}, left clauses #{}, assigned vars #{}".format(self.num_evaluations,
                                                                                  len(problem.clauses.keys()),

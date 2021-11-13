@@ -16,13 +16,13 @@ class DIMACS:
                         clause = list(map(lambda x: int(x), clause))
                         self.add_clause(clause)
 
-    def set_clauses(self, clauses: {}) -> None:
+    def set_clauses(self, clauses: dict(int, list(int))) -> None:
         self.clauses = clauses
 
-    def get_clauses(self) -> {}:
+    def get_clauses(self) -> dict(int, list(int)):
         return self.clauses
 
-    def add_clause(self, clause: []):
+    def add_clause(self, clause: list(int)) -> None:
         clause.sort()
         clause_idx = ''.join(str(e) + "_" for e in clause)
         # ignore duplicate clauses
@@ -50,16 +50,16 @@ class DIMACS:
                     self.clauses[c_idx].remove(-literal)
 
     @staticmethod
-    def is_unit_clause(clause: []) -> bool:
+    def is_unit_clause(clause: list(int)) -> bool:
         return len(clause) == 1
 
-    def get_unit_clauses(self) -> []:
+    def get_unit_clauses(self) -> list(list(int)):
         return list(filter(lambda x: self.is_unit_clause(x), self.clauses.values()))
 
-    def get_all_variables(self) -> []:
+    def get_all_variables(self) -> list(int):
         return list(set((map(lambda x: abs(x), self.get_all_literals()))))
 
-    def get_all_literals(self) -> []:
+    def get_all_literals(self) -> list(int):
         return self.literal_indices.keys()
 
     @staticmethod
