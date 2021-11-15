@@ -2,6 +2,7 @@ import argparse
 
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
+from sat.heuristic.jeroslow_wang_heuristic import OneSidedJeroslowWangHeuristic
 from sat.heuristic.mom_heuristic import MOMHeuristic
 from util.sat_problem import SATProblem
 
@@ -11,7 +12,8 @@ arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
-    "2": lambda p: DPLL(p, heuristic=MOMHeuristic())
+    "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
+    "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic())
     # todo: add more DPLLs with heuristics here
 }
 
