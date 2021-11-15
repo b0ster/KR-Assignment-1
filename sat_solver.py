@@ -2,20 +2,25 @@ import argparse
 
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
-from sat.heuristic.jeroslow_wang_heuristic import OneSidedJeroslowWangHeuristic
+from sat.heuristic.one_sided_jeroslow_wang_heuristic import OneSidedJeroslowWangHeuristic
 from sat.heuristic.mom_heuristic import MOMHeuristic
+from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
 from util.sat_problem import SATProblem
-
-arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
-arg_parser.add_argument('-S', choices=["1", "2", "3"], default="1", required=True, help='SAT version')
-arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
-    "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic())
+    "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic()),
+    "4": lambda p: DPLL(p, heuristic=TwoSidedJeroslowWangHeuristic())
+
     # todo: add more DPLLs with heuristics here
 }
+
+arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
+arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
+arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
+
+
 
 # usage: python sat_solver.py -S{1,2,3} [dimacs-file-1] [dimacs-file-2] [....]
 if __name__ == '__main__':
