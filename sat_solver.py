@@ -8,8 +8,8 @@ arg_parser.add_argument('-S', choices=["1", "2", "3"], default="1", required=Tru
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
-    "1": DPLL(heuristics=DPLL.heuristic_original),
-    "2": DPLL(heuristics=DPLL.heuristic_original)
+    "1": DPLL(heuristic=DPLL.heuristic_original),
+    "2": DPLL(heuristic=DPLL.heuristic_dpll_improved)
     # todo: add more DPLLs with heuristics here
 }
 

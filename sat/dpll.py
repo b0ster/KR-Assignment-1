@@ -3,11 +3,12 @@ import copy
 
 
 class DPLL:
+    heuristic_original = None
     # branch immediately on unit literals (note: pure literals are ignored due to the computational expensiveness)
-    heuristic_original = "original"
+    heuristic_dpll_improved = "dpll_improved (unit clause priority)"
 
-    def __init__(self, heuristics=None) -> None:
-        self.heuristics = heuristics
+    def __init__(self, heuristic=None) -> None:
+        self.heuristic = heuristic
         self.num_evaluations = 0
         pass
 
@@ -22,22 +23,25 @@ class DPLL:
         # if nothing is violated and there are still clauses, then we must reason further
         return None
 
-    def choose_next_var(self, problem: DIMACS, var_assignments: {}) -> int:
+    def choose_next_var(self, problem: DIMACS, var_assignments: {}) -> {}:
         not_used = lambda x: abs(x) not in var_assignments.keys()
-        if self.heuristics is None:
+        if self.heuristic == DPLL.heuristic_original:
             for v in problem.get_all_variables():
                 # search for a non-used parameter to be assigned
                 if not_used(v):
-                    return abs(v)
-        elif self.heuristics == DPLL.heuristic_original:
+                    return abs(v), False
+        elif self.heuristic == DPLL.heuristic_dpll_improved:
             for v in problem.get_unit_variables():
                 # search for a non-used parameter to be assigned
                 if not_used(v):
-                    return abs(v)
+                    return abs(v), False
             for v in problem.get_all_variables():
                 # search for a non-used parameter to be assigned
                 if not_used(v):
-                    return abs(v)
+                    return abs(v), False
+        # todo: elif self.heuristic == some_other_heurstics:
+        else:
+            raise Exception("{} heuristic is not known".format(self.heuristic))
 
         raise Exception("No new variables to assign.")
 
@@ -55,9 +59,9 @@ class DPLL:
         copy_assign = copy.deepcopy(var_assignments)
 
         # find a variable
-        non_assigned_var = self.choose_next_var(problem, var_assignments)
+        non_assigned_var, init_value = self.choose_next_var(problem, var_assignments)
         # first, assign it with False, if that is not working, later on True will be assigned
-        var_assignments[non_assigned_var] = False
+        var_assignments[non_assigned_var] = init_value
 
         # CNF, so any truth value makes the statement true
         problem.remove_clause_containing(-non_assigned_var)
@@ -70,7 +74,7 @@ class DPLL:
 
         # if false does not satisfy, we must start assigning True values
         problem.set_clauses(previous_clauses)
-        copy_assign[non_assigned_var] = True
+        copy_assign[non_assigned_var] = not init_value
 
         # CNF, so any truth value makes the statement true
         problem.remove_clause_containing(non_assigned_var)
