@@ -1,20 +1,27 @@
-from util.dimacs import DIMACS
+from typing import List, Tuple
+
+from sat.heuristic.heuristic import Heuristic
+from util.satproblem import SATProblem
 import copy
 
 
 class DPLL:
-    heuristic_original = None
-    # branch immediately on unit literals (note: pure literals are ignored due to the computational expensiveness)
-    heuristic_dpll_improved = "dpll_improved (unit clause priority)"
-    heuristic_mom = "dpll with MOM heuristic"
 
-    def __init__(self, heuristic=None) -> None:
+    def __init__(self, problem: SATProblem, heuristic: Heuristic = Heuristic) -> None:
+        self.problem = problem
         self.heuristic = heuristic
         self.num_evaluations = 0
+        self.variable_history = []
+        self.initial_unit_variables = problem.get_unit_variables()
         pass
 
     @staticmethod
-    def is_satisfied(problem: DIMACS):
+    def __is_satisfied__(problem: SATProblem):
+        """
+        Checks whether the given problem is satisfied.
+        :param problem: a SATProblem instance.
+        :return: None if still not satisfied (more evaluations required), True if satisfied, False if non-satisfied.
+        """
         # check if all clauses are solved currently, then a model has been found
         if len(problem.get_clauses().keys()) == 0:
             return True
@@ -24,82 +31,81 @@ class DPLL:
         # if nothing is violated and there are still clauses, then we must reason further
         return None
 
-    def choose_next_var(self, problem: DIMACS, var_assignments: {}) -> {}:
-        not_used = lambda x: abs(x) not in var_assignments.keys()
-        if self.heuristic == DPLL.heuristic_original:
-            for v in problem.get_all_variables():
-                # search for a non-used parameter to be assigned
-                if not_used(v):
-                    return abs(v), False
-        elif self.heuristic == DPLL.heuristic_dpll_improved:
-            for v in problem.get_unit_variables():
-                # search for a non-used parameter to be assigned
-                if not_used(v):
-                    return abs(v), False
-            for v in problem.get_all_variables():
-                # search for a non-used parameter to be assigned
-                if not_used(v):
-                    return abs(v), False
-        # todo: elif self.heuristic == some_other_heurstics:
-        elif self.heuristic == DPLL.heuristic_mom:
-            k = 1
-            formula = lambda x, y: (x + y) * 2 ** k + x * y
-            shortest_clause = min([len(x) for x in problem.get_clauses().values()])
-            smallest_clauses = list(filter(lambda x: len(x) == shortest_clause, problem.get_clauses().values()))
-            var_counts = {}
-            for c in smallest_clauses:
-                for lit in c:
-                    var = abs(lit)
-                    if var in var_counts:
-                        var_counts[var][lit] += 1
-                    else:
-                        var_counts[var] = {}
-                        var_counts[var][lit] = 1
-                        var_counts[var][-lit] = 0
-            vc_list = sorted(var_counts.items(), key=lambda x: formula(x[1][x[0]], x[1][-x[0]]), reverse=True)
-            for i in vc_list:
-                if not_used(i[0]):
-                    return i[0], i[1][i[0]] > i[1][-i[0]]
-        else:
-            raise Exception("{} heuristic is not known".format(self.heuristic))
+    def __choose_next_var__(self, problem: SATProblem, var_assignments: {}) -> Tuple[int, bool]:
+        """
+        Selects a new variable and a starting value based on given heuristics.
+        :param problem: a SATProblem instance.
+        :param var_assignments: tuple of currently assigned vars {111: True, 121: False, 122, False, ...}.
+        :return: a new variable with a starting value to try.
+        """
+        return self.heuristic.select(problem, var_assignments)
 
-        raise Exception("No new variables to assign.")
+    def __print_progress__(self, problem: SATProblem, var_assignments: Tuple[int, bool]) -> None:
+        """
+        Prints the current progress of the DPLL algorithm.
+        :param problem: a SATProblem instance.
+        :param var_assignments: the currently assigned variables.
+        """
+        n = self.num_evaluations
+        c = len(problem.clauses.keys())
+        v = len(var_assignments.keys())
+        va = len(problem.get_all_variables())
+        print("\rDPLL: evaluation #{}, left clauses #{}, assigned vars {}/{}".format(n, c, v, va), flush=True, end='')
 
-    def solve(self, problem: DIMACS, var_assignments: {}) -> {}:
+    def solve(self, var_assignments: {}) -> Tuple[bool, Tuple[int, bool]]:
+        """
+        Solved the SATProblem using a DPLL-procedure recursively.
+        :param var_assignments: the currently assigned vars, needed to choose a new one.
+        :return: a Tuple with a boolean representing the satisfiability, and a Tuple of variable assignments.
+        """
         self.num_evaluations += 1
-        print("\rDPLL: evaluation #{}, left clauses #{}, assigned vars {}/{}".format(self.num_evaluations,
-                                                                                     len(problem.clauses.keys()),
-                                                                                     len(var_assignments.keys()),
-                                                                                     len(problem.get_all_variables())),
-              flush=True, end=''),
-        satisfied = self.is_satisfied(problem)
+        self.__print_progress__(self.problem, var_assignments)
+
+        satisfied = DPLL.__is_satisfied__(self.problem)
         if satisfied is not None:
             return satisfied, var_assignments
 
         # deepcopy the the state as this method is recursive
-        previous_clauses = copy.deepcopy(problem.get_clauses())
+        previous_clauses = copy.deepcopy(self.problem.get_clauses())
         copy_assign = copy.deepcopy(var_assignments)
 
         # find a variable and a starting value
-        non_assigned_var, init_value = self.choose_next_var(problem, var_assignments)
+        non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
+        self.variable_history.append({non_assigned_var: init_value})
         var_assignments[non_assigned_var] = init_value
 
         # CNF, so any truth value makes the statement true
-        problem.remove_clause_containing(non_assigned_var if init_value else -non_assigned_var)
+        self.problem.remove_clause_containing(non_assigned_var if init_value else -non_assigned_var)
 
         # Removes the opposite from other clauses
-        problem.remove_literal_from_clauses(non_assigned_var if not init_value else -non_assigned_var)
-        satisfied, var_assignments = self.solve(problem, var_assignments)
+        self.problem.remove_literal_from_clauses(non_assigned_var if not init_value else -non_assigned_var)
+        satisfied, var_assignments = self.solve(var_assignments)
         if satisfied:
             return satisfied, var_assignments
 
+        self.variable_history.append({non_assigned_var: not init_value})
         # try the opposite of the init value
-        problem.set_clauses(previous_clauses)
+        self.problem.set_clauses(previous_clauses)
         copy_assign[non_assigned_var] = not init_value
 
         # CNF, so any truth value makes the statement true
-        problem.remove_clause_containing(non_assigned_var if not init_value else -non_assigned_var)
+        self.problem.remove_clause_containing(non_assigned_var if not init_value else -non_assigned_var)
 
         # Removes the opposite from other clauses
-        problem.remove_literal_from_clauses(non_assigned_var if init_value else -non_assigned_var)
-        return self.solve(problem, copy_assign)
+        self.problem.remove_literal_from_clauses(non_assigned_var if init_value else -non_assigned_var)
+        return self.solve(copy_assign)
+
+    def get_variable_assignment_history(self) -> List[tuple]:
+        """
+        Gets a list of variable assignments that has been tried.
+        [{111: True}, {122: False}, {111:False}, ..., {..}]
+        :return: list of tuples in assignment order, first one is the first variable tried.
+        """
+        return self.variable_history
+
+    def get_initial_unit_variables(self) -> List[int]:
+        """
+        Gets a list of unit variables before the solving had began.
+        :return: list of initial unit variables.
+        """
+        return self.initial_unit_variables

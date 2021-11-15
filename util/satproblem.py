@@ -1,9 +1,14 @@
-class DIMACS:
+from typing import List, Tuple
+
+
+class SATProblem:
     """
         Reads DIMACS format from a file, and puts the clauses into memory
     """
 
-    def __init__(self, file: str = None) -> None:
+    def __init__(self, file: str = None, file_type: str = 'DIMACS') -> None:
+        if file_type != 'DIMACS':
+            raise Exception("Only DIMACS files are supported currently.")
         self.clauses = {}
         self.literal_indices = {}
         if file is not None:
@@ -16,13 +21,13 @@ class DIMACS:
                         clause = list(map(lambda x: int(x), clause))
                         self.add_clause(clause)
 
-    def set_clauses(self, clauses: {}) -> None:
+    def set_clauses(self, clauses: Tuple[str, List[int]]) -> None:
         self.clauses = clauses
 
-    def get_clauses(self) -> {}:
+    def get_clauses(self) -> Tuple[str, List[int]]:
         return self.clauses
 
-    def add_clause(self, clause: []):
+    def add_clause(self, clause: List[int]) -> None:
         clause.sort()
         clause_idx = ''.join(str(e) + "_" for e in clause)
         # ignore duplicate clauses
@@ -50,20 +55,20 @@ class DIMACS:
                     self.clauses[c_idx].remove(-literal)
 
     @staticmethod
-    def is_unit_clause(clause: []) -> bool:
+    def is_unit_clause(clause: List[int]) -> bool:
         return len(clause) == 1
 
-    def get_unit_clauses(self) -> []:
+    def get_unit_clauses(self) -> List[List[int]]:
         return list(filter(lambda x: self.is_unit_clause(x), self.clauses.values()))
 
-    def get_all_variables(self) -> []:
+    def get_all_variables(self) -> List[int]:
         return list(set((map(lambda x: abs(x), self.get_all_literals()))))
 
-    def get_unit_variables(self) -> []:
+    def get_unit_variables(self) -> List[int]:
         return list(set(map(lambda x: abs(x[0]), self.get_unit_clauses())))
 
-    def get_all_literals(self) -> []:
-        return self.literal_indices.keys()
+    def get_all_literals(self) -> List[int]:
+        return list(self.literal_indices.keys())
 
     @staticmethod
     def literal_is_negated(literal: int) -> bool:
