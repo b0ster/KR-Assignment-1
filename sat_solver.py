@@ -7,6 +7,8 @@ from sat.heuristic.mom_heuristic import MOMHeuristic
 from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
 from util.sat_problem import SATProblem
 
+from visualizer import Visualizer
+
 dplls = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
@@ -51,3 +53,6 @@ if __name__ == '__main__':
 
     # original unit clauses
     original_unit_variables = dpll.get_initial_unit_variables()
+
+    viz = Visualizer(original_unit_variables, variable_assignment_history, out_path=None)
+    viz.run()
