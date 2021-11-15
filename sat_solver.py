@@ -20,8 +20,6 @@ arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
-
-
 # usage: python sat_solver.py -S{1,2,3} [dimacs-file-1] [dimacs-file-2] [....]
 if __name__ == '__main__':
     args = arg_parser.parse_args()
