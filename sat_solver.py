@@ -35,5 +35,5 @@ if __name__ == '__main__':
     items = list(assignments.items())
     items.sort()
     solution = [(k, j) for k, j in items if j] if satisfied else "-"
-    print("Satisfied: {}, Assignments: {}".format(satisfied, solution))
+    print("\nSatisfied: {}, Assignments: {}".format(satisfied, solution))
     # todo, save found solution to a new DIMACS file

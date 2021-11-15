@@ -67,9 +67,11 @@ class DPLL:
 
     def solve(self, problem: DIMACS, var_assignments: {}) -> {}:
         self.num_evaluations += 1
-        print("DPLL: evaluation #{}, left clauses #{}, assigned vars #{}".format(self.num_evaluations,
-                                                                                 len(problem.clauses.keys()),
-                                                                                 len(var_assignments.keys())))
+        print("\rDPLL: evaluation #{}, left clauses #{}, assigned vars {}/{}".format(self.num_evaluations,
+                                                                                     len(problem.clauses.keys()),
+                                                                                     len(var_assignments.keys()),
+                                                                                     len(problem.get_all_variables())),
+              flush=True, end=''),
         satisfied = self.is_satisfied(problem)
         if satisfied is not None:
             return satisfied, var_assignments
