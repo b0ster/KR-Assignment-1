@@ -1,10 +1,13 @@
 from sat.heuristic.heuristic import Heuristic
-from util.satproblem import SATProblem
+from util.sat_problem import SATProblem
 
 
 class MOMHeuristic(Heuristic):
 
     def select(self, problem: SATProblem, var_assignments: {}):
+        for v in problem.get_unit_variables():
+            if v not in var_assignments.keys():
+                return abs(v), False
         k = 1
         formula = lambda x, y: (x + y) * 2 ** k + x * y
         shortest_clause = min([len(x) for x in problem.get_clauses().values()])

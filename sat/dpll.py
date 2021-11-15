@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from sat.heuristic.heuristic import Heuristic
-from util.satproblem import SATProblem
+from util.sat_problem import SATProblem
 import copy
 
 

@@ -1,10 +1,9 @@
 import argparse
 
 from sat.dpll import DPLL
-from sat.heuristic.dpll_improved_heuristic import DPLLImprovedHeuristic
 from sat.heuristic.heuristic import Heuristic
 from sat.heuristic.mom_heuristic import MOMHeuristic
-from util.satproblem import SATProblem
+from util.sat_problem import SATProblem
 
 arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=["1", "2", "3"], default="1", required=True, help='SAT version')
@@ -12,8 +11,7 @@ arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 dplls = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
-    "2": lambda p: DPLL(p, heuristic=DPLLImprovedHeuristic()),
-    "3": lambda p: DPLL(p, heuristic=MOMHeuristic())
+    "2": lambda p: DPLL(p, heuristic=MOMHeuristic())
     # todo: add more DPLLs with heuristics here
 }
 
