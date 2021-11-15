@@ -42,17 +42,19 @@ class DPLL:
                     return abs(v), False
         # todo: elif self.heuristic == some_other_heurstics:
         elif self.heuristic == DPLL.heuristic_mom:
-            k = 2
+            k = 1
             formula = lambda x, y: (x + y) * 2 ** k + x * y
+            shortest_clause = min([len(x) for x in problem.get_clauses().values()])
+            smallest_clauses = list(filter(lambda x: len(x) == shortest_clause, problem.get_clauses().values()))
             var_counts = {}
-            for c in problem.get_clauses().values():
+            for c in smallest_clauses:
                 for lit in c:
                     var = abs(lit)
                     if var in var_counts:
-                        var_counts[var][lit] = 1 / len(c) if var_counts[var][lit] < 1 / len(c) else var_counts[var][lit]
+                        var_counts[var][lit] += 1
                     else:
                         var_counts[var] = {}
-                        var_counts[var][lit] = 1 / len(c)
+                        var_counts[var][lit] = 1
                         var_counts[var][-lit] = 0
             vc_list = sorted(var_counts.items(), key=lambda x: formula(x[1][x[0]], x[1][-x[0]]), reverse=True)
             for i in vc_list:
