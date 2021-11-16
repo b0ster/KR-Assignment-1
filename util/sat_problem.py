@@ -1,3 +1,4 @@
+import math
 from typing import List, Tuple
 
 
@@ -73,3 +74,21 @@ class SATProblem:
     @staticmethod
     def literal_is_negated(literal: int) -> bool:
         return literal < 0
+
+    def save_to_file_dimacs(self, name: str, location: str) -> None:
+        if location is None:
+            raise Exception("Location must be specified.")
+        if name is None:
+            raise Exception("Name must be specified.")
+        dimacs = ["c " + name + ".cnf"]
+        dim = round(math.sqrt(len(self.get_clauses())))
+        for c in self.get_clauses().values():
+            str_clause = ""
+            for l in c:
+                str_clause += str(l) + " "
+            str_clause += "0"
+            dimacs.append(str_clause)
+        dimacs.insert(1, "p cnf {}{}{} {}".format(dim, dim, dim, len(dimacs) - 1))
+        with open(location, "w") as output:
+            for l in dimacs:
+                output.write(l + "\n")
