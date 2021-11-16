@@ -12,6 +12,7 @@ class DPLL:
         self.problem = problem
         self.heuristic = heuristic
         self.num_evaluations = 0
+        self.num_backtracking = 0
         self.variable_history = []
         self.initial_unit_variables = problem.get_unit_variables()
         self.stats = {}
@@ -85,6 +86,7 @@ class DPLL:
         if satisfied:
             return satisfied, var_assignments
 
+        self.num_backtracking += 1
         self.variable_history.append({non_assigned_var: not init_value})
         # try the opposite of the init value
         self.problem.set_clauses(previous_clauses)
@@ -104,13 +106,15 @@ class DPLL:
         """
         print("Running DPLL with heuristic [{}]".format(self.heuristic.name()))
         self.stats["heuristic"] = self.heuristic.name()
+        self.stats["n_initial_unit_variables"] = len(self.problem.get_unit_variables())
         self.stats["n_variables"] = len(self.problem.get_all_variables())
         self.stats["n_clauses"] = len(self.problem.get_clauses().keys())
         self.stats["n_literals"] = len(self.problem.get_all_literals())
-        self.stats["start_time"] = time()
+        self.stats["time_start"] = time()
         result = self.__solve__({})
         self.stats["n_evaluations"] = self.num_evaluations
-        self.stats["end_time"] = time()
+        self.stats["n_backtracking"] = self.num_backtracking
+        self.stats["time_end"] = time()
         return result
 
     def get_stats_map(self) -> Tuple[str, any]:

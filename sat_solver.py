@@ -27,8 +27,9 @@ dplls = {
 # these are the arguments available
 arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
-arg_parser.add_argument('--is-sudoku', choices=['yes', 'no'], default='yes')
-arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
+arg_parser.add_argument('--is-sudoku', choices=['yes', 'no'], default='yes', help='If the target problem is a sudoku')
+arg_parser.add_argument('-O', help='Output folder for results')
+arg_parser.add_argument('rest', nargs=argparse.REMAINDER, help='DIMACS files (to be merged)')
 
 
 def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
@@ -45,7 +46,7 @@ def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL) -> None:
+def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
@@ -53,18 +54,18 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL)
     """
     # save model to DIMACS format
     list_a = list(assignments.items())
-    dir_name = result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     dm = SATProblem()
+
     for x, y in list_a:
         if y:
             dm.add_clause([x])
-    dm.save_to_file_dimacs("sat_result", dir_name + "/dimacs.txt")
+    dm.save_to_file_dimacs("sat_result", output_dir + "/dimacs.txt")
 
     # save the stats
     stats = dpll.get_stats_map()
-    with open(dir_name + "/stats.csv", 'w') as stats_csv:
+    with open(output_dir + "/stats.csv", 'w') as stats_csv:
         writer = csv.DictWriter(stats_csv, fieldnames=list(stats.keys()))
         writer.writeheader()
         writer.writerow(stats)
@@ -82,9 +83,9 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL)
                 result = [v for v in vars if str(v).startswith(str(i + 1) + str(j + 1))]
                 sudoku_str += str(result[0])[2:] + " "
             sudoku_str += "\n"
-            with open(dir_name + "/sudoku.txt", 'w') as file:
+            with open(output_dir + "/sudoku.txt", 'w') as file:
                 file.write(sudoku_str)
-    print("Saved results to directory '{}'".format(dir_name))
+    print("Saved results to directory '{}'".format(output_dir))
 
 
 # usage: python sat_solver.py -S{1,2,3} [dimacs-file-1] [dimacs-file-2] [....]
@@ -106,4 +107,5 @@ if __name__ == '__main__':
         items = list(assignments.items())
         items.sort()
         print("Solution: {}".format([(k, j) for k, j in items if j]))
-        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll)
+        output_dir = args.O if args.O else result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
+        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir)
