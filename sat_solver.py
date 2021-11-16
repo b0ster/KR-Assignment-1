@@ -66,7 +66,9 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL,
     # save the stats
     stats = dpll.get_stats_map()
     with open(output_dir + "/stats.csv", 'w') as stats_csv:
-        writer = csv.DictWriter(stats_csv, fieldnames=list(stats.keys()))
+        keys = list(stats.keys())
+        keys.sort()
+        writer = csv.DictWriter(stats_csv, fieldnames=keys)
         writer.writeheader()
         writer.writerow(stats)
     # save possibly sudoku specific data
