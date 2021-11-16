@@ -52,9 +52,9 @@ class DPLL:
         va = len(problem.get_all_variables())
         print("\rDPLL: evaluation #{}, left clauses #{}, assigned vars {}/{}".format(n, c, v, va), flush=True, end='')
 
-    def solve(self, var_assignments: {}) -> Tuple[bool, Tuple[int, bool]]:
+    def __solve__(self, var_assignments: {}) -> Tuple[bool, Tuple[int, bool]]:
         """
-        Solved the SATProblem using a DPLL-procedure recursively.
+        Solves the SATProblem using a DPLL-procedure recursively.
         :param var_assignments: the currently assigned vars, needed to choose a new one.
         :return: a Tuple with a boolean representing the satisfiability, and a Tuple of variable assignments.
         """
@@ -79,7 +79,7 @@ class DPLL:
 
         # Removes the opposite from other clauses
         self.problem.remove_literal_from_clauses(non_assigned_var if not init_value else -non_assigned_var)
-        satisfied, var_assignments = self.solve(var_assignments)
+        satisfied, var_assignments = self.__solve__(var_assignments)
         if satisfied:
             return satisfied, var_assignments
 
@@ -93,7 +93,14 @@ class DPLL:
 
         # Removes the opposite from other clauses
         self.problem.remove_literal_from_clauses(non_assigned_var if init_value else -non_assigned_var)
-        return self.solve(copy_assign)
+        return self.__solve__(copy_assign)
+
+    def solve(self) -> Tuple[bool, Tuple[int, bool]]:
+        """
+         Solves the SATProblem using a DPLL-procedure.
+         :return: a Tuple with a boolean representing the satisfiability, and a Tuple of variable assignments.
+        """
+        return self.__solve__({})
 
     def get_variable_assignment_history(self) -> List[tuple]:
         """

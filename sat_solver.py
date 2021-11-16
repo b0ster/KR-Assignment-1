@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # merge the SATProblems and solve it
     total_problem = __merge_sat_problems__([SATProblem(s) for s in args.rest])
     dpll = dplls[args.S](total_problem)
-    satisfied, assignments = dpll.solve({})
+    satisfied, assignments = dpll.solve()
 
     print("\nSatisfied: {}".format(satisfied))
     if satisfied:
