@@ -9,6 +9,6 @@ for path in ../data/sudoku/dimacs/9x9/*.txt; do
   filename="${filename%.*}"
   for heur in ${heuristics[@]}; do
       dir="$output_folder$filename/${heur}"
-      python ../sat_solver.py -S ${heur} -O ${dir} ${rules} ${path}
+      python ../sat_solver.py -S ${heur} -O ${dir} -ID ${filename} ${rules} ${path}
   done
 done

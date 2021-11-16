@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from sat.heuristic.heuristic import Heuristic
 from util.sat_problem import SATProblem
@@ -117,7 +117,7 @@ class DPLL:
         self.stats["time_end"] = time()
         return result
 
-    def get_stats_map(self) -> Tuple[str, any]:
+    def get_stats_map(self) -> Dict[str, any]:
         """
         Gets a map with tracked statistics.
         :return: map with tracked statistics.

@@ -29,6 +29,7 @@ arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
 arg_parser.add_argument('--is-sudoku', choices=['yes', 'no'], default='yes', help='If the target problem is a sudoku')
 arg_parser.add_argument('-O', help='Output folder for results')
+arg_parser.add_argument('-ID', help='ID of the problem to add to the results', required=False)
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER, help='DIMACS files (to be merged)')
 
 
@@ -46,7 +47,7 @@ def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir) -> None:
+def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id=None) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
@@ -65,6 +66,7 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL,
 
     # save the stats
     stats = dpll.get_stats_map()
+    stats["id"] = id
     with open(output_dir + "/stats.csv", 'w') as stats_csv:
         keys = list(stats.keys())
         keys.sort()
@@ -110,4 +112,5 @@ if __name__ == '__main__':
         items.sort()
         print("Solution: {}".format([(k, j) for k, j in items if j]))
         output_dir = args.O if args.O else result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
-        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir)
+        id = args.ID
+        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir, id)
