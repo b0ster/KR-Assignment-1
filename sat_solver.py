@@ -2,7 +2,7 @@ import argparse
 import math
 import os
 from time import time, strftime, localtime
-from typing import Tuple
+from typing import Tuple, List
 
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
@@ -23,13 +23,33 @@ dplls = {
     # todo: add more DPLLs with heuristics here
 }
 
+# these are the arguments available
 arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
 arg_parser.add_argument('--is-sudoku', choices=['yes', 'no'], default='yes')
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER)
 
 
-def save_results(assignments: Tuple[int, bool], is_sudoku: bool):
+def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
+    """
+    Merges a list of SATProblem into one single problem.
+    :param sp: List of SATProblem instances.
+    :return: a merged combined SATProblem.
+    """
+    total_problem = SATProblem()
+    # merge the different DIMACS files as this is a CNF
+    for problem in sp:
+        for c in problem.get_clauses().values():
+            total_problem.add_clause(c)
+    return total_problem
+
+
+def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool) -> None:
+    """
+    Saves the results of the SAT solving to disk.
+    :param assignments: assignments of all variables.
+    :param is_sudoku: whether the SAT problem is a sudoku, if so more results are saved.
+    """
     list_a = list(assignments.items())
     dir_name = result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
     if not os.path.exists(dir_name):
@@ -40,6 +60,10 @@ def save_results(assignments: Tuple[int, bool], is_sudoku: bool):
             dm.add_clause([x])
     dm.save_to_file_dimacs("sat_result", dir_name + "/dimacs.txt")
     if is_sudoku:
+        # todo: add the visualization here!
+        # variable_assignment_history = dpll.get_variable_assignment_history()
+        # original_unit_variables = dpll.get_initial_unit_variables()
+
         vars = dm.get_all_variables()
         dim = round(math.sqrt(len(dm.get_clauses().values())))
         sudoku_str = ""
@@ -58,30 +82,18 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
     if len(args.rest) == 0:
         raise Exception("Please give at least one DIMACS file...")
-
-    total_problem = SATProblem()
-    # merge the different DIMACS files as this is a CNF
-    for problem in args.rest:
-        d = SATProblem(file=problem)
-        for c in d.get_clauses().values():
-            total_problem.add_clause(c)
-
     if args.S not in dplls:
         raise Exception("DPLL with id '{}' has not been implemented yet.".format(args.S))
-    # solve the merged SAT problems using the DPLL algorithm
+
+    # merge the SATProblems and solve it
+    total_problem = __merge_sat_problems__([SATProblem(s) for s in args.rest])
     dpll = dplls[args.S](total_problem)
     satisfied, assignments = dpll.solve({})
 
-    # make a printable solution if there is one
-    items = list(assignments.items())
-    items.sort()
-    solution = [(k, j) for k, j in items if j] if satisfied else "-"
-    print("\nSatisfied: {}, Assignments: {}".format(satisfied, solution))
-    # todo, save found solution to a new DIMACS file
-    save_results(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes')
-
-    # variable assignment history
-    variable_assignment_history = dpll.get_variable_assignment_history()
-
-    # original unit clauses
-    original_unit_variables = dpll.get_initial_unit_variables()
+    print("\nSatisfied: {}".format(satisfied))
+    if satisfied:
+        # make a printable solution if there is one
+        items = list(assignments.items())
+        items.sort()
+        print("Solution: {}".format([(k, j) for k, j in items if j]))
+        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes')
