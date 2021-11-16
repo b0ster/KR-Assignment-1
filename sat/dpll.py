@@ -3,6 +3,7 @@ from typing import List, Tuple
 from sat.heuristic.heuristic import Heuristic
 from util.sat_problem import SATProblem
 import copy
+from time import time
 
 
 class DPLL:
@@ -13,6 +14,7 @@ class DPLL:
         self.num_evaluations = 0
         self.variable_history = []
         self.initial_unit_variables = problem.get_unit_variables()
+        self.stats = {}
         pass
 
     @staticmethod
@@ -100,7 +102,23 @@ class DPLL:
          Solves the SATProblem using a DPLL-procedure.
          :return: a Tuple with a boolean representing the satisfiability, and a Tuple of variable assignments.
         """
-        return self.__solve__({})
+        print("Running DPLL with heuristic [{}]".format(self.heuristic.name()))
+        self.stats["heuristic"] = self.heuristic.name()
+        self.stats["n_variables"] = len(self.problem.get_all_variables())
+        self.stats["n_clauses"] = len(self.problem.get_clauses().keys())
+        self.stats["n_literals"] = len(self.problem.get_all_literals())
+        self.stats["start_time"] = time()
+        result = self.__solve__({})
+        self.stats["n_evaluations"] = self.num_evaluations
+        self.stats["end_time"] = time()
+        return result
+
+    def get_stats_map(self) -> Tuple[str, any]:
+        """
+        Gets a map with tracked statistics.
+        :return: map with tracked statistics.
+        """
+        return self.stats
 
     def get_variable_assignment_history(self) -> List[tuple]:
         """

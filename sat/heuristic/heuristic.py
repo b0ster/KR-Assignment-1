@@ -9,6 +9,9 @@ class Heuristic:
     def __init__(self) -> None:
         pass
 
+    def name(self) -> str:
+        return "default_dpll"
+
     def select(self, problem: SATProblem, var_assignments: {}):
         for v in problem.get_unit_variables():
             if v not in var_assignments.keys():

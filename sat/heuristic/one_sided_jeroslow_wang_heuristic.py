@@ -4,6 +4,9 @@ from util.sat_problem import SATProblem
 
 class OneSidedJeroslowWangHeuristic(Heuristic):
 
+    def name(self) -> str:
+        return "1_sided_jw"
+
     def select(self, problem: SATProblem, var_assignments: {}):
         for v in problem.get_unit_variables():
             if v not in var_assignments.keys():

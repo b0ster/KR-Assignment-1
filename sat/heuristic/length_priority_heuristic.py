@@ -4,6 +4,9 @@ from util.sat_problem import SATProblem
 
 class LengthPriorityHeuristic(Heuristic):
 
+    def name(self) -> str:
+        return "length_priority_max"
+
     def select(self, problem: SATProblem, var_assignments: {}):
         var_counts = {}
         for c in problem.get_clauses().values():

@@ -1,6 +1,7 @@
 import argparse
 import math
 import os
+import csv
 from time import time, strftime, localtime
 from typing import Tuple, List
 
@@ -44,12 +45,13 @@ def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool) -> None:
+def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
     :param is_sudoku: whether the SAT problem is a sudoku, if so more results are saved.
     """
+    # save model to DIMACS format
     list_a = list(assignments.items())
     dir_name = result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
     if not os.path.exists(dir_name):
@@ -59,6 +61,14 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool) -> None:
         if y:
             dm.add_clause([x])
     dm.save_to_file_dimacs("sat_result", dir_name + "/dimacs.txt")
+
+    # save the stats
+    stats = dpll.get_stats_map()
+    with open(dir_name + "/stats.csv", 'w') as stats_csv:
+        writer = csv.DictWriter(stats_csv, fieldnames=list(stats.keys()))
+        writer.writeheader()
+        writer.writerow(stats)
+    # save possibly sudoku specific data
     if is_sudoku:
         # todo: add the visualization here!
         # variable_assignment_history = dpll.get_variable_assignment_history()
@@ -96,4 +106,4 @@ if __name__ == '__main__':
         items = list(assignments.items())
         items.sort()
         print("Solution: {}".format([(k, j) for k, j in items if j]))
-        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes')
+        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll)
