@@ -25,8 +25,7 @@ class MOMHeuristic(Heuristic):
                     var_counts[var] = {}
                     var_counts[var][lit] = 1
                     var_counts[var][-lit] = 0
-        vc_list = sorted(var_counts.items(), key=lambda x: formula(x[1][x[0]], x[1][-x[0]]), reverse=True)
-        for i in vc_list:
-            if i[0] not in var_assignments.keys():
-                return i[0], i[1][i[0]] > i[1][-i[0]]
+        if len(var_counts):
+            l = max(var_counts, key=lambda x: formula(var_counts[x][x], var_counts[x][-x]))
+            return abs(l), max(var_counts[l], key=var_counts[l].get) > 0
         raise Heuristic.no_var_left_exception

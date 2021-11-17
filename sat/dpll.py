@@ -29,8 +29,9 @@ class DPLL:
         if len(problem.get_clauses().keys()) == 0:
             return True
         # check if there are empty clauses, then the rules are violated
-        if len(list(filter(lambda x: len(x) == 0, problem.get_clauses().values()))) > 0:
-            return False
+        for c in problem.get_clauses().values():
+            if len(c) == 0:
+                return False
         # if nothing is violated and there are still clauses, then we must reason further
         return None
 
