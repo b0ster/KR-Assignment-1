@@ -54,5 +54,5 @@ if __name__ == '__main__':
     # original unit clauses
     original_unit_variables = dpll.get_initial_unit_variables()
 
-    viz = Visualizer(original_unit_variables, variable_assignment_history, out_path=None)
+    viz = Visualizer(original_unit_variables, variable_assignment_history, out_path='anim/9x9_1.gif')
     viz.run()

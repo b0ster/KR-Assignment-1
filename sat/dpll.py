@@ -71,7 +71,7 @@ class DPLL:
 
         # find a variable and a starting value
         non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
-        self.variable_history.append({non_assigned_var: init_value})
+        self.variable_history.append((non_assigned_var, init_value))
         var_assignments[non_assigned_var] = init_value
 
         # CNF, so any truth value makes the statement true
@@ -83,7 +83,7 @@ class DPLL:
         if satisfied:
             return satisfied, var_assignments
 
-        self.variable_history.append({non_assigned_var: not init_value})
+        self.variable_history.append((non_assigned_var, not init_value))
         # try the opposite of the init value
         self.problem.set_clauses(previous_clauses)
         copy_assign[non_assigned_var] = not init_value
@@ -98,7 +98,7 @@ class DPLL:
     def get_variable_assignment_history(self) -> List[tuple]:
         """
         Gets a list of variable assignments that has been tried.
-        [{111: True}, {122: False}, {111:False}, ..., {..}]
+        [(111, True), (122, False), (111, False), ..., (..)]
         :return: list of tuples in assignment order, first one is the first variable tried.
         """
         return self.variable_history

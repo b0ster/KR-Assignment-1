@@ -3,14 +3,20 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
+import matplotlib.animation as animation
 plt.style.use('seaborn-pastel')
 
 class Visualizer:
     def __init__(self, initial_unit_variables: list[int], variable_history: list[tuple], out_path=None, debug_mode=False) -> None:
-        self.init_vars = initial_unit_variables
-        self.var_history = variable_history
-        self.current_vars = set()
+        self.init_vars = dict()
+        for num in initial_unit_variables:
+            x, y, z = tuple(map(lambda x: int(x), str(num)))
+            self.init_vars[(x, y)] = z
+            
+        self.var_history = [(int(str(num)[0]), int(str(num)[1]), int(str(num)[2]), b) for num, b in variable_history]
+
+        self.current_vars = dict()
 
         self.fig, self.ax = plt.subplots()
         self.white_cmap = None
@@ -48,11 +54,9 @@ class Visualizer:
             x = i + 1
             y = j + 1
             if input_matrix[i, j] == 0:
-                var = int(f"{x}{y}{1}")
-                self.var_history.append((var, True))
+                self.var_history.append((x, y, 1, True))
             else:
-                var = int(f"{x}{y}{input_matrix[i, j]}")
-                self.init_vars.append(var)
+                self.init_vars.append((x, y, input_matrix[i, j]))
 
     def setup_axes(self, ax: plt.Axes) -> None:
         # Minor ticks
@@ -70,42 +74,60 @@ class Visualizer:
         self.ax.get_xaxis().set_ticklabels([])
         self.ax.get_yaxis().set_ticklabels([])
 
-    def set_numbers(self, i: int) -> None:
-        self.setup_axes(self.ax)
-
-        for num in self.init_vars:
-            num_str = str(num)
-            x, y, z = tuple(map(lambda x: int(x), num_str))
-            self.ax.text(x-1, y-1, z, ha="center", va="center", color="black", size=25)
-
-        if i < len(self.var_history):
-            var, is_added = self.var_history[i]
-            if is_added:
-                self.current_vars.add(var)
-            elif not is_added:
-                self.current_vars.remove(var)
-
-        for num in self.current_vars:
-            num_str = str(num)
-            x, y, z = tuple(map(lambda x: int(x), num_str))
-            self.ax.text(x-1, y-1, z, ha="center", va="center", color="red", size=25)
-
-    def update(self, i: int) -> None:
+    def set_numbers(self) -> None:
         self.ax.clear()
 
-        self.set_numbers(i)
+        self.setup_axes(self.ax)
+
+        for k, v in self.init_vars.items():
+            x, y = k
+            z = v
+            self.ax.text(x-1, y-1, z, ha="center", va="center", color="black", size=25)
+
+        for k, v in self.current_vars.items():
+            x, y = k
+            z = v
+            self.ax.text(x-1, y-1, z, ha="center", va="center", color="red", size=25)
 
         self.ax.imshow(np.zeros((9,9)), cmap=self.white_cmap)
 
+    def init(self) -> None:
+        self.set_numbers()
+
+    def update(self, i: int) -> None:
+        if len(self.var_history) == 0:
+            return
+
+        for j in range(len(self.var_history)):
+            x, y, z, is_added = self.var_history[j]
+            
+            if is_added and not (x, y) in self.init_vars:
+                self.current_vars[(x, y)] = z
+                self.var_history = self.var_history[j+1:]
+                self.set_numbers()
+                return
+
+            elif not is_added and (x, y) in self.current_vars:
+                if self.current_vars[(x, y)] == z:
+                    del self.current_vars[(x, y)]
+                    self.var_history = self.var_history[j+1:]
+                    self.set_numbers()
+                    return
+
+        self.var_history = []
+        return     
+
     def run(self) -> None:
-        self.anim = FuncAnimation(self.fig, self.update, frames=len(self.var_history), repeat=False)
+        self.anim = FuncAnimation(fig=self.fig, func=self.update, frames=len(self.var_history), init_func=self.init, repeat=True, save_count=len(self.var_history))
         plt.show()
 
-        if self.out_path is not None:
-            self.save(self.out_path)
+        self.anim.save(self.out_path, writer=PillowWriter(fps=15))
 
-    def save(self, path='sudoku.gif') -> None:
-        self.anim.save(path, writer='imagemagick')
+        # if self.out_path is not None:
+        #     self.save(self.out_path)
+
+    def save(self, path: str) -> None:
+        self.anim.save(path, writer=PillowWriter(fps=15))
 
 if __name__ == '__main__':
     viz = Visualizer([], [], out_path=None, debug_mode=True)
