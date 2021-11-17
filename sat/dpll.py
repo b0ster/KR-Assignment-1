@@ -54,7 +54,9 @@ class DPLL:
         c = len(problem.clauses.keys())
         v = len(var_assignments.keys())
         va = len(problem.get_all_variables())
-        print("\rDPLL: evaluation #{}, left clauses #{}, assigned vars {}/{}".format(n, c, v, va), flush=True, end='')
+        b = self.num_backtracking
+        msg = "\rDPLL: evaluation #{}, backtrackings #{}, left clauses #{}, assigned vars {}/{}".format(n,b, c, v, va)
+        print(msg, flush=True, end='')
 
     def __solve__(self, var_assignments: {}) -> Tuple[bool, Tuple[int, bool]]:
         """
@@ -70,34 +72,31 @@ class DPLL:
             return satisfied, var_assignments
 
         # deepcopy the the state as this method is recursive
-        previous_clauses = copy.deepcopy(self.problem.get_clauses())
-        copy_assign = copy.deepcopy(var_assignments)
+        # previous_clauses = copy.deepcopy(self.problem.get_clauses())
+        copy_assign = copy.copy(var_assignments)
+        counter = copy.copy(self.problem.state_counter)
 
         # find a variable and a starting value
         non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
         self.variable_history.append({non_assigned_var: init_value})
         var_assignments[non_assigned_var] = init_value
 
-        # CNF, so any truth value makes the statement true
-        self.problem.remove_clause_containing(non_assigned_var if init_value else -non_assigned_var)
+        self.problem.solve_literal(non_assigned_var if init_value else -non_assigned_var)
 
-        # Removes the opposite from other clauses
-        self.problem.remove_literal_from_clauses(non_assigned_var if not init_value else -non_assigned_var)
         satisfied, var_assignments = self.__solve__(var_assignments)
         if satisfied:
+            del self.problem.previous_clauses[counter]
             return satisfied, var_assignments
 
         self.num_backtracking += 1
         self.variable_history.append({non_assigned_var: not init_value})
         # try the opposite of the init value
-        self.problem.set_clauses(previous_clauses)
+        self.problem.set_clauses(self.problem.get_previous_clauses(counter))
         copy_assign[non_assigned_var] = not init_value
 
         # CNF, so any truth value makes the statement true
-        self.problem.remove_clause_containing(non_assigned_var if not init_value else -non_assigned_var)
+        self.problem.solve_literal(non_assigned_var if not init_value else -non_assigned_var)
 
-        # Removes the opposite from other clauses
-        self.problem.remove_literal_from_clauses(non_assigned_var if init_value else -non_assigned_var)
         return self.__solve__(copy_assign)
 
     def solve(self) -> Tuple[bool, Tuple[int, bool]]:

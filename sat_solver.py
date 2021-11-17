@@ -76,10 +76,19 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL,
     # save possibly sudoku specific data
     if is_sudoku:
         # todo: add the visualization here!
-        # variable_assignment_history = dpll.get_variable_assignment_history()
-        # original_unit_variables = dpll.get_initial_unit_variables()
+        variable_assignment_history = dpll.get_variable_assignment_history()
+        map = {}
+        for v in variable_assignment_history:
+            k = list(v.keys())[0]
+            if k not in map:
+                map[k] = 1
+            else:
+                map[k] += 1
+
+                # original_unit_variables = dpll.get_initial_unit_variables()
 
         vars = dm.get_all_variables()
+        vars.sort()
         dim = round(math.sqrt(len(dm.get_clauses().values())))
         sudoku_str = ""
         for i in range(dim):

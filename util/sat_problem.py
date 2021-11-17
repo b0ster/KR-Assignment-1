@@ -1,5 +1,5 @@
 import math
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 class SATProblem:
@@ -11,6 +11,8 @@ class SATProblem:
         if file_type != 'DIMACS':
             raise Exception("Only DIMACS files are supported currently.")
         self.clauses = {}
+        self.state_counter = 0
+        self.previous_clauses = {}
         self.literal_indices = {}
         if file is not None:
             with open(file, 'r') as f:
@@ -22,15 +24,17 @@ class SATProblem:
                         clause = list(map(lambda x: int(x), clause))
                         self.add_clause(clause)
 
-    def set_clauses(self, clauses: Tuple[str, List[int]]) -> None:
+    def set_clauses(self, clauses: Dict[str, List[int]]) -> None:
         self.clauses = clauses
 
-    def get_clauses(self) -> Tuple[str, List[int]]:
+    def get_clauses(self) -> Dict[str, List[int]]:
         return self.clauses
 
+    def get_previous_clauses(self, state_counter) -> Dict[str, List[int]]:
+        return self.previous_clauses[state_counter]
+
     def add_clause(self, clause: List[int]) -> None:
-        clause.sort()
-        clause_idx = ''.join(str(e) + "_" for e in clause)
+        clause_idx = ''.join(str(e) + "_" for e in sorted(clause))
         # ignore duplicate clauses
         if clause_idx not in self.clauses:
             self.clauses[clause_idx] = clause
@@ -40,20 +44,21 @@ class SATProblem:
                 else:
                     self.literal_indices[lit] = [clause_idx]
 
-    def remove_clause_containing(self, literal: int) -> None:
+    def solve_literal(self, literal: int) -> None:
+        self.previous_clauses[self.state_counter] = {}
+        for c_idx, clauses in self.get_clauses().items():
+            self.previous_clauses[self.state_counter][c_idx] = []
+            self.previous_clauses[self.state_counter][c_idx] = [lit for lit in clauses]
+
         for c_idx in self.literal_indices[literal]:
             if c_idx in self.clauses:
                 del self.clauses[c_idx]
-
-    def remove_literal_from_clauses(self, literal: int) -> None:
-        if literal in self.literal_indices:
-            for c_idx in self.literal_indices[literal]:
-                if c_idx in self.clauses:
-                    self.clauses[c_idx].remove(literal)
         if -literal in self.literal_indices:
             for c_idx in self.literal_indices[-literal]:
                 if c_idx in self.clauses:
-                    self.clauses[c_idx].remove(-literal)
+                    if -literal in self.clauses[c_idx]:
+                        self.clauses[c_idx].remove(-literal)
+        self.state_counter += 1
 
     @staticmethod
     def is_unit_clause(clause: List[int]) -> bool:
