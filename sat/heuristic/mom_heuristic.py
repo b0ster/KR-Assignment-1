@@ -8,9 +8,9 @@ class MOMHeuristic(Heuristic):
         return "mom"
 
     def select(self, problem: SATProblem, var_assignments: {}):
-        for v in problem.get_unit_variables():
-            if v not in var_assignments.keys():
-                return abs(v), False
+        for v in problem.get_unit_literals():
+            if abs(v) not in var_assignments.keys():
+                return abs(v), v > 0
         k = 1
         formula = lambda x, y: (x + y) * 2 ** k + x * y
         shortest_clause = min([len(x) for x in problem.get_clauses().values()])

@@ -8,9 +8,9 @@ class TwoSidedJeroslowWangHeuristic(Heuristic):
         return "2_sided_jw"
 
     def select(self, problem: SATProblem, var_assignments: {}):
-        for v in problem.get_unit_variables():
-            if v not in var_assignments.keys():
-                return abs(v), False
+        for v in problem.get_unit_literals():
+            if abs(v) not in var_assignments.keys():
+                return abs(v), v > 0
         var_counts = {}
         for c in problem.get_clauses().values():
             c_weight = 2 ** -len(c)

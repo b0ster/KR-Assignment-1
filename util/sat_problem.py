@@ -68,6 +68,9 @@ class SATProblem:
     def get_unit_variables(self) -> List[int]:
         return list(set(map(lambda x: abs(x[0]), self.get_unit_clauses())))
 
+    def get_unit_literals(self) -> List[int]:
+        return list(set(map(lambda x: x[0], self.get_unit_clauses())))
+
     def get_all_literals(self) -> List[int]:
         return list(self.literal_indices.keys())
 

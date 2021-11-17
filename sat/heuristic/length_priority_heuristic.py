@@ -8,9 +8,9 @@ class LengthPriorityHeuristic(Heuristic):
         return "length_priority_max"
 
     def select(self, problem: SATProblem, var_assignments: {}):
-        for v in problem.get_unit_variables():
-            if v not in var_assignments.keys():
-                return abs(v), False
+        for v in problem.get_unit_literals():
+            if abs(v) not in var_assignments.keys():
+                return abs(v), v > 0
         lit_lengths = {}
         for c in problem.get_clauses().values():
             for lit in c:
