@@ -89,9 +89,9 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL,
 
                 # original_unit_variables = dpll.get_initial_unit_variables()
 
-        vars = dm.get_all_variables()
+        vars = [x for x, y in list_a if y]
         vars.sort()
-        dim = round(math.sqrt(len(dm.get_clauses().values())))
+        dim = round((len(dm.get_clauses().values())) ** (1. / 3.))
         sudoku_str = ""
         for i in range(dim):
             for j in range(dim):
