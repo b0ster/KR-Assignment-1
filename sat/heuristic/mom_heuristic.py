@@ -3,6 +3,7 @@ from util.sat_problem import SATProblem
 
 
 class MOMHeuristic(Heuristic):
+    var_counts = {}
 
     def name(self) -> str:
         return "mom"
@@ -12,22 +13,21 @@ class MOMHeuristic(Heuristic):
             if abs(v) not in var_assignments:
                 return abs(v), v > 0
         k = 1
-        var_counts = {}
         formula = lambda x, y: (x + y) * 2 ** k + x * y
         shortest_clause = min([len(x) for x in problem.get_clauses().values()])
         smallest_clauses = list(filter(lambda x: len(x) == shortest_clause, problem.get_clauses().values()))
         for c in smallest_clauses:
             for lit in c:
                 var = abs(lit)
-                if var in var_counts:
-                    var_counts[var][lit] += 1
+                if var in self.var_counts:
+                    self.var_counts[var][lit] += 1
                 else:
-                    var_counts[var] = {}
-                    var_counts[var][lit] = 1
-                    var_counts[var][-lit] = 0
-        if len(var_counts):
-            l = max(var_counts,
-                    key=lambda x: formula(var_counts[x][x],
-                                          var_counts[x][-x]) if x not in var_assignments else 0)
-            return abs(l), var_counts[abs(l)][abs(l)] > var_counts[abs(l)][-abs(l)]
+                    self.var_counts[var] = {}
+                    self.var_counts[var][lit] = 1
+                    self.var_counts[var][-lit] = 0
+        if len(self.var_counts):
+            l = max(self.var_counts,
+                    key=lambda x: formula(self.var_counts[x][x],
+                                          self.var_counts[x][-x]) if x not in var_assignments else 0)
+            return abs(l), self.var_counts[abs(l)][abs(l)] > self.var_counts[abs(l)][-abs(l)]
         raise Heuristic.no_var_left_exception
