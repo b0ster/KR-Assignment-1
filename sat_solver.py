@@ -61,7 +61,9 @@ def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL,
 
     for x, y in list_a:
         if y:
-            dm.add_clause([x])
+            dm.add_clause(([abs(x)]))
+        else:
+            dm.add_clause([-abs(x)])
     dm.save_to_file_dimacs("sat_result", output_dir + "/dimacs.txt")
 
     # save the stats
