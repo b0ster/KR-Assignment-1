@@ -1,9 +1,10 @@
 import argparse
-import math
+# import math
 import os
 import csv
 from time import time, strftime, localtime
 # from typing import tuple, list
+from typing import Any
 
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
@@ -14,7 +15,7 @@ from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWang
 from util.sat_problem import SATProblem
 
 result_dir = "results/"
-dplls = {
+dplls: dict[str, Any] = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
     "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic()),
@@ -47,7 +48,7 @@ def __merge_sat_problems__(sp: list[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id=None) -> None:
+def __save_results__(assignments: dict[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id: object =None) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
@@ -78,14 +79,17 @@ def __save_results__(assignments: tuple[int, bool], is_sudoku: bool, dpll: DPLL,
     # save possibly sudoku specific data
     if is_sudoku:
         # todo: add the visualization here!
-        variable_assignment_history = dpll.get_variable_assignment_history()
-        map = {}
-        for v in variable_assignment_history:
-            k = list(v.keys())[0]
-            if k not in map:
-                map[k] = 1
-            else:
-                map[k] += 1
+
+        # this part throws pylance errors and is unused atm
+
+        # variable_assignment_history = dpll.get_variable_assignment_history()
+        # map = {}
+        # for v in variable_assignment_history:
+        #     k = list(v.keys())[0]
+        #     if k not in map:
+        #         map[k] = 1
+        #     else:
+        #         map[k] += 1
 
                 # original_unit_variables = dpll.get_initial_unit_variables()
 

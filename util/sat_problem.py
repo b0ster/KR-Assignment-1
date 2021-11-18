@@ -1,5 +1,6 @@
 import math
 # from typing import List, Tuple, Dict
+from typing import Optional
 
 
 class SATProblem:
@@ -7,13 +8,13 @@ class SATProblem:
         Reads DIMACS format from a file, and puts the clauses into memory
     """
 
-    def __init__(self, file: str = None, file_type: str = 'DIMACS') -> None:
+    def __init__(self, file: Optional[str] = None, file_type: str = 'DIMACS') -> None:
         if file_type != 'DIMACS':
             raise Exception("Only DIMACS files are supported currently.")
-        self.clauses = {}
-        self.state_counter = 0
-        self.previous_clauses = {}
-        self.literal_indices = {}
+        self.clauses: dict[str, list[int]] = {}
+        self.state_counter: int = 0
+        self.previous_clauses: dict[int, dict[str, list[int]]] = {}
+        self.literal_indices: dict[int, list[str]] = {}
         if file is not None:
             with open(file, 'r') as f:
                 lines = f.readlines()
@@ -30,7 +31,7 @@ class SATProblem:
     def get_clauses(self) -> dict[str, list[int]]:
         return self.clauses
 
-    def get_previous_clauses(self, state_counter) -> dict[str, list[int]]:
+    def get_previous_clauses(self, state_counter: int) -> dict[str, list[int]]:
         return self.previous_clauses[state_counter]
 
     def add_clause(self, clause: list[int]) -> None:

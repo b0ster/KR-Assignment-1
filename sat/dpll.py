@@ -8,14 +8,14 @@ from time import time
 
 class DPLL:
 
-    def __init__(self, problem: SATProblem, heuristic: Heuristic = Heuristic) -> None:
+    def __init__(self, problem: SATProblem, heuristic: Heuristic = Heuristic()) -> None:
         self.problem = problem
         self.heuristic = heuristic
         self.num_evaluations = 0
         self.num_backtracking = 0
-        self.variable_history = []
+        self.variable_history: list[tuple[int, bool]] = []
         self.initial_unit_variables = problem.get_unit_variables()
-        self.stats = {}
+        self.stats: dict[str, object] = {}
         pass
 
     @staticmethod
@@ -117,14 +117,14 @@ class DPLL:
         self.stats["time_end"] = time()
         return result
 
-    def get_stats_map(self) -> dict[str, any]:
+    def get_stats_map(self) -> dict[str, object]:
         """
         Gets a map with tracked statistics.
         :return: map with tracked statistics.
         """
         return self.stats
 
-    def get_variable_assignment_history(self) -> list[tuple]:
+    def get_variable_assignment_history(self) -> list[tuple[int, bool]]:
         """
         Gets a list of variable assignments that has been tried.
         [{111: True}, {122: False}, {111:False}, ..., {..}]
