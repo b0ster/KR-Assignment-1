@@ -8,7 +8,7 @@ class OneSidedJeroslowWangHeuristic(Heuristic):
     def name(self) -> str:
         return "1_sided_jw"
 
-    def select(self, problem: SATProblem, var_assignments: {}):
+    def select(self, problem: SATProblem, var_assignments: dict[int, bool]):
         for v in problem.get_unit_literals():
             if abs(v) not in var_assignments:
                 return abs(v), v > 0

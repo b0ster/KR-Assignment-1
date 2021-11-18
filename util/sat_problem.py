@@ -1,5 +1,5 @@
 import math
-from typing import List, Tuple, Dict
+# from typing import List, Tuple, Dict
 
 
 class SATProblem:
@@ -24,16 +24,16 @@ class SATProblem:
                         clause = list(map(lambda x: int(x), clause))
                         self.add_clause(clause)
 
-    def set_clauses(self, clauses: Dict[str, List[int]]) -> None:
+    def set_clauses(self, clauses: dict[str, list[int]]) -> None:
         self.clauses = clauses
 
-    def get_clauses(self) -> Dict[str, List[int]]:
+    def get_clauses(self) -> dict[str, list[int]]:
         return self.clauses
 
-    def get_previous_clauses(self, state_counter) -> Dict[str, List[int]]:
+    def get_previous_clauses(self, state_counter) -> dict[str, list[int]]:
         return self.previous_clauses[state_counter]
 
-    def add_clause(self, clause: List[int]) -> None:
+    def add_clause(self, clause: list[int]) -> None:
         clause_idx = ''.join(str(e) + "_" for e in sorted(clause))
         # ignore duplicate clauses
         if clause_idx not in self.clauses:
@@ -61,22 +61,22 @@ class SATProblem:
         self.state_counter += 1
 
     @staticmethod
-    def is_unit_clause(clause: List[int]) -> bool:
+    def is_unit_clause(clause: list[int]) -> bool:
         return len(clause) == 1
 
-    def get_unit_clauses(self) -> List[List[int]]:
+    def get_unit_clauses(self) -> list[list[int]]:
         return list(filter(lambda x: self.is_unit_clause(x), self.clauses.values()))
 
-    def get_all_variables(self) -> List[int]:
+    def get_all_variables(self) -> list[int]:
         return list(set((map(lambda x: abs(x), self.get_all_literals()))))
 
-    def get_unit_variables(self) -> List[int]:
+    def get_unit_variables(self) -> list[int]:
         return list(set(map(lambda x: abs(x[0]), self.get_unit_clauses())))
 
-    def get_unit_literals(self) -> List[int]:
+    def get_unit_literals(self) -> list[int]:
         return list(set(map(lambda x: x[0], self.get_unit_clauses())))
 
-    def get_all_literals(self) -> List[int]:
+    def get_all_literals(self) -> list[int]:
         return list(self.literal_indices.keys())
 
     @staticmethod

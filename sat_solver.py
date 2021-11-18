@@ -3,7 +3,7 @@ import math
 import os
 import csv
 from time import time, strftime, localtime
-from typing import Tuple, List
+# from typing import tuple, list
 
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
@@ -33,7 +33,7 @@ arg_parser.add_argument('-ID', help='ID of the problem to add to the results', r
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER, help='DIMACS files (to be merged)')
 
 
-def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
+def __merge_sat_problems__(sp: list[SATProblem]) -> SATProblem:
     """
     Merges a list of SATProblem into one single problem.
     :param sp: List of SATProblem instances.
@@ -47,7 +47,7 @@ def __merge_sat_problems__(sp: List[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: Tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id=None) -> None:
+def __save_results__(assignments: tuple[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id=None) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
