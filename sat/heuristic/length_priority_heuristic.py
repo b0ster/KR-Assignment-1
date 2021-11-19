@@ -2,24 +2,24 @@ from sat.heuristic.heuristic import Heuristic
 from util.sat_problem import SATProblem
 
 
-class OneSidedJeroslowWangHeuristic(Heuristic):
-    lit_weights = {}
+class LengthPriorityHeuristic(Heuristic):
 
     def name(self) -> str:
-        return "1_sided_jw"
+        return "length_priority_max"
 
     def select(self, problem: SATProblem, var_assignments: dict[int, bool]):
         for v in problem.get_unit_literals():
             if abs(v) not in var_assignments:
                 return abs(v), v > 0
+        lit_lengths = {}
         for c in problem.get_clauses().values():
-            c_weight = 2 ** -len(c)
             for lit in c:
-                if lit in self.lit_weights:
-                    self.lit_weights[lit] += c_weight
+                if lit in lit_lengths:
+                    if 1 / len(c) > lit_lengths[lit]:
+                        lit_lengths[lit] = 1 / len(c)
                 else:
-                    self.lit_weights[lit] = c_weight
-        if len(self.lit_weights):
-            l = max(self.lit_weights, key=lambda x: self.lit_weights.get(x) if abs(x) not in var_assignments else 0)
+                    lit_lengths[lit] = 1 / len(c)
+        if len(lit_lengths):
+            l = max(lit_lengths, key=lit_lengths.get)
             return abs(l), l > 0
         raise Heuristic.no_var_left_exception

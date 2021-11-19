@@ -1,4 +1,4 @@
-import abc
+# import abc
 
 from util.sat_problem import SATProblem
 
@@ -9,10 +9,13 @@ class Heuristic:
     def __init__(self) -> None:
         pass
 
-    def select(self, problem: SATProblem, var_assignments: {}):
-        for v in problem.get_unit_variables():
-            if v not in var_assignments.keys():
-                return abs(v), False
+    def name(self) -> str:
+        return "default_dpll"
+
+    def select(self, problem: SATProblem, var_assignments: dict[int, bool]):
+        for v in problem.get_unit_literals():
+            if abs(v) not in var_assignments:
+                return abs(v), v > 0
         for v in problem.get_all_variables():
             if v not in var_assignments.keys():
                 return abs(v), False
