@@ -25,6 +25,10 @@ class DPLL:
         :param problem: a SATProblem instance.
         :return: None if still not satisfied (more evaluations required), True if satisfied, False if non-satisfied.
         """
+        # lt = problem.get_unit_literals()
+        # for l in problem.get_unit_literals():
+        #     if -l in lt:
+        #         return False
         # check if all clauses are solved currently, then a model has been found
         if len(problem.get_clauses().keys()) == 0:
             return True
@@ -39,22 +43,11 @@ class DPLL:
         unit_lit = self.problem.get_unit_literals()
         if len(unit_lit):
             for u in unit_lit:
-                if abs(u) not in var_assignments:
-                    self.problem.solve_literal(u)
-                    # if abs(u) not in var_assignments:
-                    v = u > 0
-                    self.variable_history.append((abs(u), v))
-                    var_assignments[abs(u)] = v
-                    self.__print_progress__(self.problem, var_assignments)
-
-        pure_lit = self.problem.get_pure_literals()
-        if len(pure_lit):
-            for p in pure_lit:
-                self.problem.solve_literal(p)
+                self.problem.solve_literal(u)
                 # if abs(u) not in var_assignments:
-                v = p > 0
-                self.variable_history.append((abs(p), v))
-                var_assignments[abs(p)] = v
+                v = u > 0
+                self.variable_history.append((abs(u), v))
+                var_assignments[abs(u)] = v
                 self.__print_progress__(self.problem, var_assignments)
 
     def __choose_next_var__(self, problem: SATProblem, var_assignments: dict[int, bool]) -> tuple[
@@ -95,10 +88,8 @@ class DPLL:
         if satisfied is not None:
             return satisfied, var_assignments
 
-
         copy_assign = copy.copy(var_assignments)
         previous_clauses = self.problem.get_copied_clauses()
-
         non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
 
         var_assignments[non_assigned_var] = init_value

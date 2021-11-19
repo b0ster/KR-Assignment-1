@@ -50,7 +50,8 @@ class SATProblem:
         for literal in literals:
             for c_idx in self.literal_indices[literal]:
                 if c_idx in self.clauses:
-                    del self.clauses[c_idx]
+                    if literal in self.clauses[c_idx]:
+                        del self.clauses[c_idx]
             if -literal in self.literal_indices:
                 for c_idx in self.literal_indices[-literal]:
                     if c_idx in self.clauses.keys():
