@@ -9,6 +9,7 @@ from typing import Any
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
 from sat.heuristic.length_priority_heuristic import LengthPriorityHeuristic
+from sat.heuristic.min_occurances_heuristic import MinOccurrencesHeuristic
 from sat.heuristic.one_sided_jeroslow_wang_heuristic import OneSidedJeroslowWangHeuristic
 from sat.heuristic.mom_heuristic import MOMHeuristic
 from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
@@ -20,8 +21,8 @@ dplls: dict[str, Any] = {
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
     "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic()),
     "4": lambda p: DPLL(p, heuristic=TwoSidedJeroslowWangHeuristic()),
-    "5": lambda p: DPLL(p, heuristic=LengthPriorityHeuristic())
-
+    "5": lambda p: DPLL(p, heuristic=LengthPriorityHeuristic()),
+    "6": lambda p: DPLL(p, heuristic=MinOccurrencesHeuristic())
     # todo: add more DPLLs with heuristics here
 }
 
