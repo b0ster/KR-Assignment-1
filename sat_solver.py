@@ -55,7 +55,7 @@ def __save_results__(assignments: dict[int, bool], is_sudoku: bool, dpll: DPLL, 
     :param is_sudoku: whether the SAT problem is a sudoku, if so more results are saved.
     """
     # save model to DIMACS format
-    list_a = list(assignments.items())
+    list_a = sorted(assignments.items(), key=lambda _x: abs(_x[0]))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     dm = SATProblem()

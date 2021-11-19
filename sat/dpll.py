@@ -35,7 +35,30 @@ class DPLL:
         # if nothing is violated and there are still clauses, then we must reason further
         return None
 
-    def __choose_next_var__(self, problem: SATProblem, var_assignments: dict[int, bool]) -> tuple[int, bool]:
+    def __simplify__(self, var_assignments: dict[int, bool]) -> None:
+        unit_lit = self.problem.get_unit_literals()
+        if len(unit_lit):
+            for u in unit_lit:
+                if abs(u) not in var_assignments:
+                    self.problem.solve_literal(u)
+                    # if abs(u) not in var_assignments:
+                    v = u > 0
+                    self.variable_history.append((abs(u), v))
+                    var_assignments[abs(u)] = v
+                    self.__print_progress__(self.problem, var_assignments)
+
+        pure_lit = self.problem.get_pure_literals()
+        if len(pure_lit):
+            for p in pure_lit:
+                self.problem.solve_literal(p)
+                # if abs(u) not in var_assignments:
+                v = p > 0
+                self.variable_history.append((abs(p), v))
+                var_assignments[abs(p)] = v
+                self.__print_progress__(self.problem, var_assignments)
+
+    def __choose_next_var__(self, problem: SATProblem, var_assignments: dict[int, bool]) -> tuple[
+        int, bool]:
         """
         Selects a new variable and a starting value based on given heuristics.
         :param problem: a SATProblem instance.
@@ -55,7 +78,7 @@ class DPLL:
         v = len(var_assignments.keys())
         va = len(problem.get_all_variables())
         b = self.num_backtracking
-        msg = "\rDPLL: evaluation #{}, backtrackings #{}, left clauses #{}, assigned vars {}/{}".format(n,b, c, v, va)
+        msg = "\rDPLL: evaluation #{}, backtrackings #{}, left clauses #{}, assigned vars {}/{}".format(n, b, c, v, va)
         print(msg, flush=True, end='')
 
     def __solve__(self, var_assignments: dict[int, bool]) -> tuple[bool, dict[int, bool]]:
@@ -66,37 +89,34 @@ class DPLL:
         """
         self.num_evaluations += 1
         self.__print_progress__(self.problem, var_assignments)
+        self.__simplify__(var_assignments)
 
         satisfied = DPLL.__is_satisfied__(self.problem)
         if satisfied is not None:
             return satisfied, var_assignments
 
-        # deepcopy the state as this method is recursive
-        # previous_clauses = copy.deepcopy(self.problem.get_clauses())
-        copy_assign = copy.copy(var_assignments)
-        counter = copy.copy(self.problem.state_counter)
 
-        # find a variable and a starting value
+        copy_assign = copy.copy(var_assignments)
+        previous_clauses = self.problem.get_copied_clauses()
+
         non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
-        self.variable_history.append((non_assigned_var, init_value))
+
         var_assignments[non_assigned_var] = init_value
 
+        self.variable_history.append((non_assigned_var, init_value))
         self.problem.solve_literal(non_assigned_var if init_value else -non_assigned_var)
 
         satisfied, var_assignments = self.__solve__(var_assignments)
         if satisfied:
-            del self.problem.previous_clauses[counter]
             return satisfied, var_assignments
 
         self.num_backtracking += 1
         self.variable_history.append((non_assigned_var, not init_value))
-        # try the opposite of the init value
-        self.problem.set_clauses(self.problem.get_previous_clauses(counter))
+
+        self.problem.set_clauses(previous_clauses)
         copy_assign[non_assigned_var] = not init_value
 
-        # CNF, so any truth value makes the statement true
         self.problem.solve_literal(non_assigned_var if not init_value else -non_assigned_var)
-
         return self.__solve__(copy_assign)
 
     def solve(self) -> tuple[bool, dict[int, bool]]:
