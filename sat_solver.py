@@ -9,6 +9,7 @@ from typing import Any
 from sat.dpll import DPLL
 from sat.heuristic.heuristic import Heuristic
 from sat.heuristic.length_priority_heuristic import LengthPriorityHeuristic
+from sat.heuristic.min_occurances_heuristic import MinOccurrencesHeuristic
 from sat.heuristic.one_sided_jeroslow_wang_heuristic import OneSidedJeroslowWangHeuristic
 from sat.heuristic.mom_heuristic import MOMHeuristic
 from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
@@ -22,8 +23,8 @@ dplls: dict[str, Any] = {
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
     "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic()),
     "4": lambda p: DPLL(p, heuristic=TwoSidedJeroslowWangHeuristic()),
-    "5": lambda p: DPLL(p, heuristic=LengthPriorityHeuristic())
-
+    "5": lambda p: DPLL(p, heuristic=LengthPriorityHeuristic()),
+    "6": lambda p: DPLL(p, heuristic=MinOccurrencesHeuristic())
     # todo: add more DPLLs with heuristics here
 }
 
@@ -57,7 +58,7 @@ def __save_results__(assignments: dict[int, bool], is_sudoku: bool, dpll: DPLL, 
     :param is_sudoku: whether the SAT problem is a sudoku, if so more results are saved.
     """
     # save model to DIMACS format
-    list_a = list(assignments.items())
+    list_a = sorted(assignments.items(), key=lambda _x: abs(_x[0]))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     dm = SATProblem()

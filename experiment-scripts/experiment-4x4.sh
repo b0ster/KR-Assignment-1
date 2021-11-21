@@ -1,6 +1,6 @@
 #!/bin/bash
 rules="../data/rules/sudoku-rules-4x4.txt"
-heuristics=("1" "2" "3" "4" "5")
+heuristics=("1" "2" "3" "4" "5" "6")
 dt=$(date '+%Y_%m_%d_%H_%M_%S')
 output_folder="../results/experiment/4x4/${dt}/"
 
