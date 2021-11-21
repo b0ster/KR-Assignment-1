@@ -88,10 +88,7 @@ class DPLL:
             del self.problem.previous_clauses[counter]
             return satisfied, var_assignments
 
-<<<<<<< HEAD
-=======
         self.num_backtracking += 1
->>>>>>> master
         self.variable_history.append((non_assigned_var, not init_value))
         # try the opposite of the init value
         self.problem.set_clauses(self.problem.get_previous_clauses(counter))

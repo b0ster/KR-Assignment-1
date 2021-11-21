@@ -68,7 +68,7 @@ class SATProblem:
         return list(filter(lambda x: self.is_unit_clause(x), self.clauses.values()))
 
     def get_all_variables(self) -> list[int]:
-        return list(set((map(lambda x: abs(x), self.get_all_literals()))))
+        return list(set(map(lambda x: abs(x), self.get_all_literals())))
 
     def get_unit_variables(self) -> list[int]:
         return list(set(map(lambda x: abs(x[0]), self.get_unit_clauses())))
