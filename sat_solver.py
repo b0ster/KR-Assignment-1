@@ -14,6 +14,8 @@ from sat.heuristic.mom_heuristic import MOMHeuristic
 from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
 from util.sat_problem import SATProblem
 
+from visualizer import Visualizer
+
 result_dir = "results/"
 dplls: dict[str, Any] = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
@@ -119,6 +121,8 @@ if __name__ == '__main__':
     total_problem = __merge_sat_problems__([SATProblem(s) for s in args.rest])
     dpll = dplls[args.S](total_problem)
     satisfied, assignments = dpll.solve()
+    init_vars = dpll.get_initial_unit_variables()
+    var_history = dpll.get_variable_assignment_history()
 
     print("\nSatisfied: {}".format(satisfied))
     if satisfied:
@@ -129,3 +133,8 @@ if __name__ == '__main__':
         output_dir = args.O if args.O else result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
         id = args.ID
         __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir, id)
+
+        vis = Visualizer(init_vars, var_history, out_path='plots/sudoku_9x9_1/')
+        vis.run_images()
+
+
