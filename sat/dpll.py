@@ -138,7 +138,7 @@ class DPLL:
     def get_variable_assignment_history(self) -> list[tuple[int, bool]]:
         """
         Gets a list of variable assignments that has been tried.
-        [{111: True}, {122: False}, {111:False}, ..., {..}]
+        [(111, True), (122, False), (111, False), ..., (..)]
         :return: list of tuples in assignment order, first one is the first variable tried.
         """
         return self.variable_history
