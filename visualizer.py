@@ -17,6 +17,7 @@ class Visualizer:
         self.var_history = [(int(str(num)[0]), int(str(num)[1]), int(str(num)[2]), b) for num, b in variable_history]
 
         self.current_vars = dict()
+        self.current_lits = dict()
 
         self.fig, self.ax = plt.subplots()
         self.white_cmap = None
@@ -133,6 +134,11 @@ class Visualizer:
 
         for i in range(len(self.var_history)):
             x, y, z, is_added = self.var_history[i]
+
+            if (x,y) in self.current_lits.keys():
+                self.current_lits[(x,y)][z] = is_added
+            else:
+                self.current_lits[(x,y)] = {z: is_added}
             
             if is_added and not (x, y) in self.init_vars:
                 self.current_vars[(x, y)] = z
@@ -144,6 +150,12 @@ class Visualizer:
             elif not is_added and (x, y) in self.current_vars:
                 if self.current_vars[(x, y)] == z:
                     del self.current_vars[(x, y)]
+
+                    if (x, y) in self.current_lits.keys():
+                        for k, v in self.current_lits[(x,y)].items():
+                            if v:
+                                self.current_vars[(x,y)] = k
+
                     self.set_numbers()
                     plt.savefig(self.out_path + 'plot_' + str(j) + '.png')
                     j += 1
