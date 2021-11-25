@@ -135,7 +135,7 @@ if __name__ == '__main__':
         id = args.ID
         __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir, id)
 
-        vis = Visualizer(init_vars, var_history, out_path='plots/sudoku_9x9_1/')
+        vis = Visualizer(init_vars, var_history, out_path='plots/sudoku_9x9_' + args.S + '/')
         vis.run_images()
 
 
