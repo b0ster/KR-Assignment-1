@@ -1,8 +1,8 @@
 import argparse
 # import math
+import math
 import os
 import csv
-from time import time, strftime, localtime
 # from typing import tuple, list
 from typing import Any
 
@@ -15,10 +15,9 @@ from sat.heuristic.mom_heuristic import MOMHeuristic
 from sat.heuristic.two_sided_jeroslow_wang_heuristic import TwoSidedJeroslowWangHeuristic
 from util.sat_problem import SATProblem
 
-from visualizer import Visualizer
+from util.visualizer import Visualizer
 
-result_dir = "results/"
-dplls: dict[str, Any] = {
+dplls = {
     "1": lambda p: DPLL(p, heuristic=Heuristic()),
     "2": lambda p: DPLL(p, heuristic=MOMHeuristic()),
     "3": lambda p: DPLL(p, heuristic=OneSidedJeroslowWangHeuristic()),
@@ -32,7 +31,8 @@ dplls: dict[str, Any] = {
 arg_parser = argparse.ArgumentParser(description="SAT solve using DPLL")
 arg_parser.add_argument('-S', choices=list(dplls.keys()), default="1", required=True, help='SAT version')
 arg_parser.add_argument('--is-sudoku', choices=['yes', 'no'], default='yes', help='If the target problem is a sudoku')
-arg_parser.add_argument('-O', help='Output folder for results')
+arg_parser.add_argument('-O', help='Output folder for results (default current directory)')
+arg_parser.add_argument('-V', choices=["yes", "no"], help='Enable visualization (currently only when --is-sudoku=yes)')
 arg_parser.add_argument('-ID', help='ID of the problem to add to the results', required=False)
 arg_parser.add_argument('rest', nargs=argparse.REMAINDER, help='DIMACS files (to be merged)')
 
@@ -51,11 +51,11 @@ def __merge_sat_problems__(sp: list[SATProblem]) -> SATProblem:
     return total_problem
 
 
-def __save_results__(assignments: dict[int, bool], is_sudoku: bool, dpll: DPLL, output_dir: str, id: object =None) -> None:
+def __save_results__(assignments: dict[int, bool], dpll: DPLL, output_dir: str,
+                     id: object = None) -> None:
     """
     Saves the results of the SAT solving to disk.
     :param assignments: assignments of all variables.
-    :param is_sudoku: whether the SAT problem is a sudoku, if so more results are saved.
     """
     # save model to DIMACS format
     list_a = sorted(assignments.items(), key=lambda _x: abs(_x[0]))
@@ -68,46 +68,21 @@ def __save_results__(assignments: dict[int, bool], is_sudoku: bool, dpll: DPLL, 
             dm.add_clause(([abs(x)]))
         else:
             dm.add_clause([-abs(x)])
-    dm.save_to_file_dimacs("sat_result", output_dir + "/dimacs.txt")
+    out_name = output_dir + "/" + str(id) + ".out"
+    print("Saving result to {}".format(out_name))
+    dm.save_to_file_dimacs("sat_result", out_name)
 
     # save the stats
     stats = dpll.get_stats_map()
     stats["id"] = id
-    with open(output_dir + "/stats.csv", 'w') as stats_csv:
+    stats_name = output_dir + "/" + str(id) + "-stats.csv"
+    with open(stats_name, 'w') as stats_csv:
+        print("Writing stats to {}".format(stats_name))
         keys = list(stats.keys())
         keys.sort()
         writer = csv.DictWriter(stats_csv, fieldnames=keys)
         writer.writeheader()
         writer.writerow(stats)
-    # save possibly sudoku specific data
-    if is_sudoku:
-        # todo: add the visualization here!
-
-        # this part throws pylance errors and is unused atm
-
-        # variable_assignment_history = dpll.get_variable_assignment_history()
-        # map = {}
-        # for v in variable_assignment_history:
-        #     k = list(v.keys())[0]
-        #     if k not in map:
-        #         map[k] = 1
-        #     else:
-        #         map[k] += 1
-
-                # original_unit_variables = dpll.get_initial_unit_variables()
-
-        vars = [x for x, y in list_a if y]
-        vars.sort()
-        dim = round((len(dm.get_clauses().values())) ** (1. / 3.))
-        sudoku_str = ""
-        for i in range(dim):
-            for j in range(dim):
-                result = [v for v in vars if str(v).startswith(str(i + 1) + str(j + 1))]
-                sudoku_str += str(result[0])[2:] + " "
-            sudoku_str += "\n"
-            with open(output_dir + "/sudoku.txt", 'w') as file:
-                file.write(sudoku_str)
-    print("Saved results to directory '{}'".format(output_dir))
 
 
 # usage: python sat_solver.py -S{1,2,3} [dimacs-file-1] [dimacs-file-2] [....]
@@ -131,11 +106,13 @@ if __name__ == '__main__':
         items = list(assignments.items())
         items.sort()
         print("Solution: {}".format([(k, j) for k, j in items if j]))
-        output_dir = args.O if args.O else result_dir + strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
-        id = args.ID
-        __save_results__(assignments, '--is-sudoku' not in args or args['--is-sudoku'] == 'yes', dpll, output_dir, id)
-
-        vis = Visualizer(init_vars, var_history, out_path='plots/sudoku_9x9_' + args.S + '/')
-        vis.run_images()
-
-
+        output_dir = args.O if args.O else '.'
+        id = args.ID or args.rest[0]
+        is_sudoku = '--is-sudoku' not in args or args['--is-sudoku'] == 'yes'
+        __save_results__(assignments, dpll, output_dir, id)
+        if args.V == 'yes' and is_sudoku and round((len(assignments) ** (1 / 3))) == 9:
+            dir = 'plots/sudoku_9x9_' + args.S + '/'
+            print("Saving visualizations to {}".format(dir))
+            vis = Visualizer(init_vars, var_history, out_path=dir)
+            vis.run_images()
+        print("Done.")
