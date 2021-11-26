@@ -13,9 +13,9 @@ class DPLL:
         self.heuristic = heuristic
         self.num_evaluations = 0
         self.num_backtracking = 0
-        self.variable_history: list[tuple[int, bool]] = []
+        self.variable_history = []
         self.initial_unit_variables = problem.get_unit_variables()
-        self.stats: dict[str, object] = {}
+        self.stats = {}
         pass
 
     @staticmethod
@@ -25,6 +25,7 @@ class DPLL:
         :param problem: a SATProblem instance.
         :return: None if still not satisfied (more evaluations required), True if satisfied, False if non-satisfied.
         """
+        # Below is very computational expensive, and not worth it
         # lt = problem.get_unit_literals()
         # for l in problem.get_unit_literals():
         #     if -l in lt:
@@ -84,19 +85,25 @@ class DPLL:
         self.__print_progress__(self.problem, var_assignments)
         self.__simplify__(var_assignments)
 
+        # check if satisfied or not
         satisfied = DPLL.__is_satisfied__(self.problem)
         if satisfied is not None:
             return satisfied, var_assignments
 
         copy_assign = copy.copy(var_assignments)
         previous_clauses = self.problem.get_copied_clauses()
+
+        # choose a new var to assign (with a starting init value, based on any current heuristic)
         non_assigned_var, init_value = self.__choose_next_var__(self.problem, var_assignments)
 
         var_assignments[non_assigned_var] = init_value
 
         self.variable_history.append((non_assigned_var, init_value))
+
+        # "solve" the literal by removing the clauses containing it and reducing clauses containing the negation
         self.problem.solve_literal(non_assigned_var if init_value else -non_assigned_var)
 
+        # check if satisfied, otherwise assign the opposite value by backtracking
         satisfied, var_assignments = self.__solve__(var_assignments)
         if satisfied:
             return satisfied, var_assignments
@@ -104,10 +111,14 @@ class DPLL:
         self.num_backtracking += 1
         self.variable_history.append((non_assigned_var, not init_value))
 
+        # go back in the tree, reset to previous state
         self.problem.set_clauses(previous_clauses)
         copy_assign[non_assigned_var] = not init_value
 
+        # "solve" the negation of the previous tried init value
         self.problem.solve_literal(non_assigned_var if not init_value else -non_assigned_var)
+
+        # proceed DPLL
         return self.__solve__(copy_assign)
 
     def solve(self) -> tuple[bool, dict[int, bool]]:
