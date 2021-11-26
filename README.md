@@ -3,6 +3,22 @@
 A generic DPLL SAT solver implementation, which can solve any DIMACS-formatted problem.\
 This repository contains a variety of DIMACS-formatted sudoku SAT problems.
 
+### Prerequisites:
+- **Python 3.9**
+- Packages (Numpy, MatPlotLib)
+
+#### Installing packages:
+
+**Numpy**
+```Bash
+pip install numpy
+```
+
+**MatPlotLib**
+```Bash
+pip install matplotlib
+```
+
 ### Usage:
 
 To solve a DIMACS SAT-problem, `sat_solver.py` can be used.
