@@ -21,19 +21,29 @@ pip install matplotlib
 
 ### Usage:
 
-To solve a DIMACS SAT-problem, `sat_solver.py` can be used.
+To solve a DIMACS SAT-problem, `SAT.sh` or `sat_solver.py` can be used.
 
 #### Examples:
 Multiple DIMACS files can be given simultaneously to the SAT-solver. These problems will then 
 be merged to a single one.
 
 First example (two files separately (will be merged)):
+```bash
+ /bin/bash SAT.sh -S 1 data/rules/sudoku-rules-4x4.txt data/sudoku/dimacs/4x4/sudoku-4x4-3.txt
+```
+
+or
 
 ```bash
  python sat_solver.py -S 1 data/rules/sudoku-rules-4x4.txt data/sudoku/dimacs/4x4/sudoku-4x4-3.txt
 ```
 
 Second example (single file **merged beforehand**):
+```bash
+ /bin/bash SAT.sh -S 1 data/rules/sudoku-rules-4x4_and_sudoku-4x4-3.txt
+```
+
+or
 
 ```bash
  python sat_solver.py -S 1 data/rules/sudoku-rules-4x4_and_sudoku-4x4-3.txt
